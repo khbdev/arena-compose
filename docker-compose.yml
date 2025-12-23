@@ -1,0 +1,167 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: yangi_parol
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - arena
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6380:6379"
+    networks:
+      - arena
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: arena
+      RABBITMQ_DEFAULT_PASS: 123456
+    ports:
+      - "5680:5672"
+      - "15673:15672"
+    networks:
+      - arena
+
+  user-service:
+    image: gopherkhb/user-service:latest
+    container_name: user-service
+    env_file:
+      - ./user-service/.env
+    volumes:
+      - ./user-service/.env:/app/.env
+    restart: always
+    networks:
+      - arena
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
+  test-section-service:
+    image: gopherkhb/test-section-service:latest
+    container_name: test-section-service
+    env_file:
+      - ./test-section-service/.env
+    volumes:
+      - ./test-section-service/.env:/app/.env
+    restart: always
+    networks:
+      - arena
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      user-service:
+        condition: service_started
+
+  ai-service:
+    image: gopherkhb/ai-service:latest
+    container_name: ai-service
+    env_file:
+      - ./ai-service/.env
+    volumes:
+      - ./ai-service/.env:/app/.env
+    restart: always
+    networks:
+      - arena
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      user-service:
+        condition: service_started
+
+  result-service:
+    image: gopherkhb/result-service:latest
+    container_name: result-service
+    env_file:
+      - ./result-service/.env
+    volumes:
+      - ./result-service/.env:/app/.env
+    restart: always
+    networks:
+      - arena
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      user-service:
+        condition: service_started
+
+  notifaction-service:
+    image: gopherkhb/notifaction-service:latest
+    container_name: notifaction-service
+    env_file:
+      - ./notifaction-service/.env
+    volumes:
+      - ./notifaction-service/.env:/app/.env
+    restart: always
+    networks:
+      - arena
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      user-service:
+        condition: service_started
+
+  geteway:
+    image: gopherkhb/geteway:latest
+    container_name: geteway
+    env_file:
+      - ./geteway/.env
+    volumes:
+      - ./geteway/.env:/app/.env
+    restart: always
+    networks:
+      - arena
+    depends_on:
+      user-service:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
+volumes:
+  mysql_data:
+
+networks:
+  arena:
+    external: true

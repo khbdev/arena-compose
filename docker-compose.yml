@@ -1,14 +1,16 @@
+version: "3.9"
+
 services:
   mysql:
     image: mysql:8.0
-    container_name: arena_mysql        # eski loyihaga tegmaydi
-    restart: always`
+    container_name: arena_mysql
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: yangi_parol
     ports:
-      - "3307:3306"                   # eski loyihaga tegmasligi uchun boshqa port
+      - "3307:3306"
     volumes:
-      - arena_mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
     networks:
       - arena
@@ -20,7 +22,7 @@ services:
 
   redis:
     image: redis:latest
-    container_name: arena_redis
+    container_name: redis
     restart: always
     ports:
       - "6380:6379"
@@ -34,7 +36,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: arena_rabbitmq
+    container_name: rabbitmq
     restart: always
     environment:
       RABBITMQ_DEFAULT_USER: arena
@@ -47,7 +49,7 @@ services:
 
   user-service:
     image: gopherkhb/user-service:latest
-    container_name: arena_user-service
+    container_name: user-service
     env_file:
       - ./user-service/.env
     volumes:
@@ -65,7 +67,7 @@ services:
 
   test-section-service:
     image: gopherkhb/test-section-service:latest
-    container_name: arena_test-section-service
+    container_name: test-section-service
     env_file:
       - ./test-section-service/.env
     volumes:
@@ -85,7 +87,7 @@ services:
 
   ai-service:
     image: gopherkhb/ai-service:latest
-    container_name: arena_ai-service
+    container_name: ai-service
     env_file:
       - ./ai-service/.env
     volumes:
@@ -103,7 +105,7 @@ services:
 
   result-service:
     image: gopherkhb/result-service:latest
-    container_name: arena_result-service
+    container_name: result-service
     env_file:
       - ./result-service/.env
     volumes:
@@ -123,7 +125,7 @@ services:
 
   notifaction-service:
     image: gopherkhb/notifaction-service:latest
-    container_name: arena_notifaction-service
+    container_name: notifaction-service
     env_file:
       - ./notifaction-service/.env
     volumes:
@@ -141,7 +143,7 @@ services:
 
   geteway:
     image: gopherkhb/geteway:latest
-    container_name: arena_geteway
+    container_name: geteway
     env_file:
       - ./geteway/.env
     volumes:
@@ -158,7 +160,7 @@ services:
         condition: service_started
 
 volumes:
-  arena_mysql_data:
+  mysql_data:
 
 networks:
   arena:

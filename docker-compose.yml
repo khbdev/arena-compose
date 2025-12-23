@@ -8,7 +8,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: yangi_parol
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
@@ -25,7 +25,7 @@ services:
     container_name: arena_redis
     restart: always
     ports:
-      - "6380:6379"
+      - "6381:6379"
     networks:
       - arena
     healthcheck:
@@ -42,8 +42,8 @@ services:
       RABBITMQ_DEFAULT_USER: arena
       RABBITMQ_DEFAULT_PASS: 123456
     ports:
-      - "5680:5672"
-      - "15673:15672"
+      - "5681:5672"
+      - "15674:15672"
     networks:
       - arena
 

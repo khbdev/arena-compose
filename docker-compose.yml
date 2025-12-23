@@ -141,9 +141,9 @@ services:
       user-service:
         condition: service_started
 
-  geteway:
+  arena-geteway:
     image: gopherkhb/geteway:latest
-    container_name: geteway
+    container_name: arena-geteway
     env_file:
       - ./geteway/.env
     volumes:
